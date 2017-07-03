@@ -44,8 +44,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create an image plane using a pre-selected picture
         let picture = UIImage(named: "sample")
-        let imagePlane = SCNPlane(width: sceneView.bounds.width / 6000,
-                                  height: sceneView.bounds.height / 6000)
+        // Change size of image here
+        let imagePlane = SCNPlane(width: sceneView.bounds.width / 1000,
+                                  height: sceneView.bounds.height / 1000)
         imagePlane.firstMaterial?.diffuse.contents = picture
         imagePlane.firstMaterial?.lightingModel = .constant
         
