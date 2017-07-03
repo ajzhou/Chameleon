@@ -28,6 +28,38 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Set the scene to the view
         sceneView.scene = scene
+        
+        // Set tap Gesture using handleTap()
+        let tapGesture = UITapGestureRecognizer(target: self, action:
+            #selector(ViewController.handleTap(gestureRecognize:)))
+        view.addGestureRecognizer(tapGesture)
+        
+    }
+    
+    @objc
+    func handleTap(gestureRecognize: UITapGestureRecognizer){
+        guard let currentFrame = sceneView.session.currentFrame else{
+            return
+        }
+        
+        // Create an image plane using a pre-selected picture
+        let picture = UIImage(named: "sample")
+        let imagePlane = SCNPlane(width: sceneView.bounds.width / 6000,
+                                  height: sceneView.bounds.height / 6000)
+        imagePlane.firstMaterial?.diffuse.contents = picture
+        imagePlane.firstMaterial?.lightingModel = .constant
+        
+        // Create plane node to place image
+        let planeNode = SCNNode(geometry: imagePlane)
+        sceneView.scene.rootNode.addChildNode(planeNode)
+        
+        // Set transform of node to be 10cm in front of the camera, for now;
+        // later change this to the plane directly in front of the camera
+        var translation = matrix_identity_float4x4
+        translation.columns.3.z = -0.1
+        planeNode.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
+        
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
