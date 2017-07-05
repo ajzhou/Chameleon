@@ -40,7 +40,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         translation.columns.3.z = -0.1
         picture.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
         
-        //let planeAnchor = ARPlaneAnchor()
+        // perform hit test based on tap
+        let point = gestureRecognize.location(in: sceneView)
+        let results = currentFrame.hitTest(point, types: [.existingPlane, .estimatedHorizontalPlane])
+        if let closestResult = results.first {
+            let anchor = ARAnchor(transform: closestResult.worldTransform)
+            session.add(anchor: anchor)
+            
+            // drop picture onto plane
+            SCNTransaction.begin()
+            SCNTransaction.animationDuration = 0.5
+            SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+            picture.position.y = anchor.transform.columns.3.y
+            SCNTransaction.commit()
+        }
+        
+        
+        
         
     }
     
