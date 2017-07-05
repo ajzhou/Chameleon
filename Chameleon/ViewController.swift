@@ -13,27 +13,18 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    var picture: Picture!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Set the view's delegate
-        sceneView.delegate = self
-        
-        // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
-        
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
-        // Set the scene to the view
-        sceneView.scene = scene
+        setupScene()
+        restartPlaneDetection()
         
         // Set tap Gesture using handleTap()
         let tapGesture = UITapGestureRecognizer(target: self, action:
             #selector(ViewController.handleTap(gestureRecognize:)))
         view.addGestureRecognizer(tapGesture)
-        
     }
     
     @objc
@@ -41,37 +32,91 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard let currentFrame = sceneView.session.currentFrame else{
             return
         }
-        
-        // Create an image plane using a pre-selected picture
-        let picture = UIImage(named: "sample")
-        // Change size of image here
-        let imagePlane = SCNPlane(width: sceneView.bounds.width / 1000,
-                                  height: sceneView.bounds.height / 1000)
-        imagePlane.firstMaterial?.diffuse.contents = picture
-        imagePlane.firstMaterial?.lightingModel = .constant
-        
-        // Create plane node to place image
-        let planeNode = SCNNode(geometry: imagePlane)
-        sceneView.scene.rootNode.addChildNode(planeNode)
+        createPicture(fileName: "sample", width: sceneView.bounds.width / 7000, height: sceneView.bounds.height / 7000)
         
         // Set transform of node to be 10cm in front of the camera, for now;
         // later change this to the plane directly in front of the camera
         var translation = matrix_identity_float4x4
         translation.columns.3.z = -0.1
-        planeNode.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
+        picture.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
         
+        //let planeAnchor = ARPlaneAnchor()
         
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    func setupScene() {
+        // set up sceneView
+        sceneView.delegate = self
+        sceneView.session = session
+        sceneView.antialiasingMode = .multisampling4X
+        sceneView.automaticallyUpdatesLighting = false
         
-        // Create a session configuration
-        let configuration = ARWorldTrackingSessionConfiguration()
+        sceneView.preferredFramesPerSecond = 60
+        sceneView.contentScaleFactor = 1.3
+        //sceneView.showsStatistics = true
         
-        // Run the view's session
-        sceneView.session.run(configuration)
+//        enableEnvironmentMapWithIntensity(25.0)
+        
+//        DispatchQueue.main.async {
+//            self.screenCenter = self.sceneView.bounds.mid
+//        }
+        
+        if let camera = sceneView.pointOfView?.camera {
+            camera.wantsHDR = true
+            camera.wantsExposureAdaptation = true
+            camera.exposureOffset = -1
+            camera.minimumExposure = -1
+        }
     }
+    
+//    func enableEnvironmentMapWithIntensity(_ intensity: CGFloat) {
+//        if sceneView.scene.lightingEnvironment.contents == nil {
+//            if let environmentMap = UIImage(named: "Models.scnassets/sharedImages/environment_blur.exr") {
+//                sceneView.scene.lightingEnvironment.contents = environmentMap
+//            }
+//        }
+//        sceneView.scene.lightingEnvironment.intensity = intensity
+//    }
+    
+    func createPicture(fileName: String, width: CGFloat, height: CGFloat){
+        picture = Picture(fileName: fileName, width: width, height: height)
+        sceneView.scene.rootNode.addChildNode(picture)
+    }
+    
+    
+    let session = ARSession()
+    var sessionConfig: ARSessionConfiguration = ARWorldTrackingSessionConfiguration()
+    var screenCenter: CGPoint?
+    
+    func restartPlaneDetection() {
+        
+        // configure session
+        if let worldSessionConfig = sessionConfig as? ARWorldTrackingSessionConfiguration {
+            worldSessionConfig.planeDetection = .horizontal
+            session.run(worldSessionConfig, options: [.resetTracking, .removeExistingAnchors])
+        }
+        // *code below is copied from ARKitExample - do not know what to do with it*
+//        // reset timer
+//        if trackingFallbackTimer != nil {
+//            trackingFallbackTimer!.invalidate()
+//            trackingFallbackTimer = nil
+//        }
+        
+//        textManager.scheduleMessage("FIND A SURFACE TO PLACE AN OBJECT",
+//                                    inSeconds: 7.5,
+//                                    messageType: .planeEstimation)
+    }
+    
+    // *do not need this code at the moment*
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//
+//        // Create a session configuration
+//        let configuration = ARWorldTrackingSessionConfiguration()
+//
+//        // Run the view's session
+//        sceneView.session.run(configuration)
+//    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)

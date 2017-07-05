@@ -15,6 +15,7 @@
 		6A1402361F09BE4600003561 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6A1402341F09BE4600003561 /* LaunchScreen.storyboard */; };
 		6A1402411F09BE4600003561 /* ChameleonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A1402401F09BE4600003561 /* ChameleonTests.swift */; };
 		6A14024C1F09BE4600003561 /* ChameleonUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A14024B1F09BE4600003561 /* ChameleonUITests.swift */; };
+		6AD73ECB1F0D6AED00AE4AFB /* Picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD73ECA1F0D6AED00AE4AFB /* Picture.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		6A1402471F09BE4600003561 /* ChameleonUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChameleonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A14024B1F09BE4600003561 /* ChameleonUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChameleonUITests.swift; sourceTree = "<group>"; };
 		6A14024D1F09BE4600003561 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6AD73ECA1F0D6AED00AE4AFB /* Picture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Picture.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +104,7 @@
 				6A1402291F09BE4600003561 /* AppDelegate.swift */,
 				6A14022B1F09BE4600003561 /* art.scnassets */,
 				6A14022D1F09BE4600003561 /* ViewController.swift */,
+				6AD73ECA1F0D6AED00AE4AFB /* Picture.swift */,
 				6A14022F1F09BE4600003561 /* Main.storyboard */,
 				6A1402321F09BE4600003561 /* Assets.xcassets */,
 				6A1402341F09BE4600003561 /* LaunchScreen.storyboard */,
@@ -260,6 +263,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6AD73ECB1F0D6AED00AE4AFB /* Picture.swift in Sources */,
 				6A14022E1F09BE4600003561 /* ViewController.swift in Sources */,
 				6A14022A1F09BE4600003561 /* AppDelegate.swift in Sources */,
 			);
@@ -528,6 +532,7 @@
 				6A1402521F09BE4600003561 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		6A1402531F09BE4600003561 /* Build configuration list for PBXNativeTarget "ChameleonTests" */ = {
 			isa = XCConfigurationList;
@@ -536,6 +541,7 @@
 				6A1402551F09BE4600003561 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		6A1402561F09BE4600003561 /* Build configuration list for PBXNativeTarget "ChameleonUITests" */ = {
 			isa = XCConfigurationList;
@@ -544,6 +550,7 @@
 				6A1402581F09BE4600003561 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
