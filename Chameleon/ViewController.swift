@@ -32,13 +32,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard let currentFrame = sceneView.session.currentFrame else{
             return
         }
-        createPicture(fileName: "sample", width: sceneView.bounds.width / 7000, height: sceneView.bounds.height / 7000)
+        var targetAnchor: ARAnchor?
+        //createPicture(fileName: "sample", width: sceneView.bounds.width / 7000, height: sceneView.bounds.height / 7000)
         
         // Set transform of node to be 10cm in front of the camera, for now;
         // later change this to the plane directly in front of the camera
-        var translation = matrix_identity_float4x4
-        translation.columns.3.z = -0.1
-        picture.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
+//       var translation = matrix_identity_float4x4
+//        translation.columns.3.z = -0.1
+//        picture.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
         
         // perform hit test based on tap
         let point = gestureRecognize.location(in: sceneView)
@@ -46,17 +47,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         if let closestResult = results.first {
             let anchor = ARAnchor(transform: closestResult.worldTransform)
             session.add(anchor: anchor)
+            targetAnchor = anchor
+            print("found anchor!!!!!!!!")
             
-            // drop picture onto plane
+        }
+        //createPicture(fileName: "sample", width: sceneView.bounds.width / 7000, height: sceneView.bounds.height / 7000)
+        createPicture(fileName: "sample", width: 0.2, height: 0.2)
+        
+        var translation = matrix_identity_float4x4
+        translation.columns.3.z = -0.1
+        picture.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
+        picture.rotation = SCNVector4.init(1, 0, 0, CGFloat.pi * 3/2)
+        // drop picture onto plane if anchor exists
+        if targetAnchor != nil {
             SCNTransaction.begin()
             SCNTransaction.animationDuration = 0.5
             SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
-            picture.position.y = anchor.transform.columns.3.y
+            picture.position.y = targetAnchor!.transform.columns.3.y
             SCNTransaction.commit()
         }
-        
-        
-        
         
     }
     
@@ -133,6 +142,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        // Run the view's session
 //        sceneView.session.run(configuration)
 //    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        
+        
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
