@@ -9,10 +9,17 @@
 import UIKit
 import SceneKit
 import ARKit
+import Firebase
+import FirebaseAuth
+import FirebaseDatabase
+import FirebaseStorage
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    
+    // The handler for the auth state listener, to allow cancelling later.
+    var handle: AuthStateDidChangeListenerHandle?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +40,45 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let tapGesture = UITapGestureRecognizer(target: self, action:
             #selector(ViewController.handleTap(gestureRecognize:)))
         view.addGestureRecognizer(tapGesture)
+        
+        print("I got here")
+        
+        // Sign in User with Firebase Auth
+        if Auth.auth().currentUser != nil {
+            print("User is already logged in anonymously with uid:" + Auth.auth().currentUser!.uid)
+        } else {
+            Auth.auth().signInAnonymously() { (user, error) in
+                if error != nil {
+                    print("This is the error msg:")
+                    print(error!)
+                    print("Here ends the error msg.")
+                    return
+                }
+                
+                // let isAnonymous = user!.isAnonymous  // true
+                // let uid = user!.uid
+                
+                if user!.isAnonymous {
+                    print("User has logged in anonymously with uid:" + user!.uid)
+                }
+                
+            }
+            
+            
+            // Code to set the user's displayName
+//            let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
+//            let displayName = "adias"
+//            changeRequest?.displayName = displayName
+//            changeRequest?.commitChanges { (error) in
+//                if error != nil {
+//                    print(error!)
+//                    return
+//                }
+//                 print("The user's displayName has been added")
+//            }
+        }
+        
+        
         
     }
     
@@ -60,10 +106,59 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         planeNode.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
         
         
+        // MARK: Andreas's Code
+        
+        var data = Data()
+        data = UIImageJPEGRepresentation(picture!, 0.8)!
+        
+        var databaseRef: DatabaseReference!
+        databaseRef = Database.database().reference()
+        
+        let storageRef = Storage.storage().reference()
+        
+        let metaData = StorageMetadata()
+        metaData.contentType = "image/jpg"
+        
+        let userID = Auth.auth().currentUser!.uid
+        let picID = databaseRef.child("/pictures/\(userID)/").childByAutoId().key
+        
+        let picturesRef = storageRef.child("/pictures/\(userID)/\(picID)")
+        
+        let uploadTask = picturesRef.putData(data, metadata: metaData) { (metadata, error) in
+            if let error = error {
+                // Uh-oh, an error occurred!
+                print(error)
+                return
+            } else {
+                // Metadata contains file metadata such as size, content-type, and download URL.
+                let downloadURL = metadata!.downloadURL()!.absoluteString
+                // format date type to string
+                let date = metadata!.timeCreated!
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+                dateFormatter.locale = Locale(identifier: "en_US")
+                let timeCreated = dateFormatter.string(from:date as Date)
+                
+                //store downloadURL at database
+                let picture = ["downloadURL": downloadURL, "timeCreated": timeCreated]
+                //            “location”:
+                let childUpdates: [String: Any] = ["/pictures/\(userID)/\(picID)": picture, "/users/\(userID)/lastPicture": picID]
+                databaseRef.updateChildValues(childUpdates)
+            }
+        }
+        
+        //-------------
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // Add Auth Listener for User Sign in State
+        handle = Auth.auth().addStateDidChangeListener { (auth, user) in
+            // self.setTitleDisplay(user)
+            // self.tableView.reloadData()
+        }
         
         // Create a session configuration
         let configuration = ARWorldTrackingSessionConfiguration()
@@ -74,6 +169,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
+        // Remove Auth Listener for User Sign in State
+        Auth.auth().removeStateDidChangeListener(handle!)
         
         // Pause the view's session
         sceneView.session.pause()
